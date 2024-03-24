@@ -74,8 +74,6 @@ func UserLogin(c *gin.Context) {
 
 func UserDelete(c *gin.Context) {
     db := config.GetDB()
-
-    // Extract user ID from the request parameters or request body
     userIDParam := c.Param("id")
     userID, err := strconv.Atoi(userIDParam)
     if err != nil {
@@ -83,21 +81,61 @@ func UserDelete(c *gin.Context) {
         return
     }
 
-    // Check if the user exists
     var user models.User
     if err := db.First(&user, userID).Error; err != nil {
         helpers.ResponseNotFound(c, "User not found")
         return
     }
 
-    // Delete the user from the database
     if err := db.Delete(&user).Error; err != nil {
         helpers.ResponseError(c, err.Error())
         return
     }
-
-    // Respond with a success message
     helpers.ResponseOK(c, gin.H{
         "message": "User deleted successfully",
+    })
+}
+
+func UserUpdate(c *gin.Context) {
+    db := config.GetDB()
+    userIDParam := c.Param("id")
+    userID, err := strconv.Atoi(userIDParam)
+    if err != nil {
+        helpers.ResponseBadRequestWithMessage(c, "Invalid user ID", helpers.ID)
+        return
+    }
+
+    // Retrieve the user from the database
+    var user models.User
+    if err := db.First(&user, userID).Error; err != nil {
+        helpers.ResponseNotFound(c, "User not found")
+        return
+    }
+
+    // Create a struct to hold the fields to update
+    type UserUpdateInput struct {
+        Username string `json:"username"`
+        Email    string `json:"email"`
+    }
+
+    var userInput UserUpdateInput
+    if err := c.ShouldBindJSON(&userInput); err != nil {
+        helpers.ResponseBadRequestWithMessage(c, "Invalid input data", err.Error())
+        return
+    }
+
+    // Update user fields
+    user.Username = userInput.Username
+    user.Email = userInput.Email
+
+    // Validate updated user
+    if err := db.Save(&user).Error; err != nil {
+        helpers.ResponseError(c, err.Error())
+        return
+    }
+
+    helpers.ResponseOK(c, gin.H{
+        "message": "User updated successfully",
+        "user":    user,
     })
 }

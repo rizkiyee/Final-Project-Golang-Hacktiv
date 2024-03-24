@@ -4,10 +4,41 @@ import (
 	"fga-final-project-mygram/config"
 	"fga-final-project-mygram/helpers"
 	"fga-final-project-mygram/models"
+	"strconv"
+
 	"github.com/dgrijalva/jwt-go"
 	"github.com/gin-gonic/gin"
-	"strconv"
 )
+
+
+func UserAuthorization() gin.HandlerFunc {
+	return func(c *gin.Context) {
+		db := config.GetDB()
+		userId, err := strconv.Atoi(c.Param("id"))
+		if err != nil {
+			helpers.ResponseBadRequestWithMessage(c, err.Error(), helpers.ID)
+			return
+		}
+
+		userData := c.MustGet("userData").(jwt.MapClaims)
+		userID := uint(userData["id"].(float64))
+		User := models.User{}
+
+		err = db.Select("user_id").First(&User, uint(userId)).Error
+		if err != nil {
+			helpers.ResponseNotFound(c, err.Error())
+			return
+		}
+
+		if User.GormModel.ID != userID {
+			helpers.ResponseStatusUnauthorizedWithMessage(c, "Not allowed to access this data")
+			return
+		}
+
+		c.Next()
+	}
+}
+
 
 func PhotoAuthorization() gin.HandlerFunc {
 	return func(c *gin.Context) {
