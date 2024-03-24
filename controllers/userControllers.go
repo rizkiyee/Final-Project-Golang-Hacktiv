@@ -105,14 +105,12 @@ func UserUpdate(c *gin.Context) {
         return
     }
 
-    // Retrieve the user from the database
     var user models.User
     if err := db.First(&user, userID).Error; err != nil {
         helpers.ResponseNotFound(c, "User not found")
         return
     }
 
-    // Create a struct to hold the fields to update
     type UserUpdateInput struct {
         Username string `json:"username"`
         Email    string `json:"email"`
@@ -124,11 +122,9 @@ func UserUpdate(c *gin.Context) {
         return
     }
 
-    // Update user fields
     user.Username = userInput.Username
     user.Email = userInput.Email
 
-    // Validate updated user
     if err := db.Save(&user).Error; err != nil {
         helpers.ResponseError(c, err.Error())
         return
