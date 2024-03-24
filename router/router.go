@@ -3,6 +3,7 @@ package router
 import (
 	"fga-final-project-mygram/controllers"
 	"fga-final-project-mygram/middlewares"
+
 	"github.com/gin-gonic/gin"
 )
 
@@ -13,6 +14,7 @@ func StartApp() *gin.Engine {
 	{
 		userRouter.POST("register", controllers.UserRegister)
 		userRouter.POST("login", controllers.UserLogin)
+		userRouter.DELETE("/:id", controllers.UserDelete)
 	}
 
 	photoRouter := r.Group("/photos")
