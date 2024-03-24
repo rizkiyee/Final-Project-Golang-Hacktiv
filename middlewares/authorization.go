@@ -30,7 +30,7 @@ func UserAuthorization() gin.HandlerFunc {
 			return
 		}
 
-		if User.GormModel.ID != userID {
+		if User.ID != userID {
 			helpers.ResponseStatusUnauthorizedWithMessage(c, "Not allowed to access this data")
 			return
 		}
