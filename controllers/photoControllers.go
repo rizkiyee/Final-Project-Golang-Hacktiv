@@ -8,14 +8,7 @@ import (
 
 	"github.com/dgrijalva/jwt-go"
 	"github.com/gin-gonic/gin"
-	"gorm.io/gorm"
 )
-
-type CreatePhotoRequest struct {
-	Title		string	`json:"title"` 
-	Caption 	string	`json:"caption"`
-	PhotoUrl	string	`json:"photo_url"`
-}
 
 var appJson = "application/json"
 
@@ -25,6 +18,11 @@ func CreatePhoto(c *gin.Context) {
 	contentType := helpers.GetContentType(c)
 
 	//req body
+	type CreatePhotoRequest struct {
+		Title		string	`json:"title"` 
+		Caption 	string	`json:"caption"`
+		PhotoUrl	string	`json:"photo_url"`
+	}	
 
 	var requestBody CreatePhotoRequest
 	if err := c.ShouldBindJSON(&requestBody); err != nil {
@@ -56,20 +54,21 @@ func CreatePhoto(c *gin.Context) {
 	}
 
 	helpers.ResponseCreated(c, gin.H{
-		"message": "Photo successfully created",
-		"created": Photo,
+		"id" : Photo.ID,
+		"title" : Photo.Title,
+		"caption" : Photo.Caption,
+		"photo_url" : Photo.PhotoUrl,
+		"user_id" : Photo.UserID,
+		"created_at" : Photo.CreatedAt,
 	})
 }
 
 func GetAllPhoto(c *gin.Context) {
 	db := config.GetDB()
-	var Photos []models.Photo
+	// var Photos []models.Photo
+	Photos := models.Photo{}
 
-	  // Preload only specific fields from the User association
-	err := db.Debug().Preload("User", func(db *gorm.DB) *gorm.DB {
-        return db.Select("id, username, email")
-    }).Find(&Photos).Error
-
+	err := db.Debug().Preload("Users").Preload("Comments").Find(&Photos).Error
 
 	if err != nil {
 		helpers.ResponseError(c, err.Error())
@@ -78,9 +77,20 @@ func GetAllPhoto(c *gin.Context) {
 
 	helpers.ResponseOK(c, gin.H{
 		"message": "All photos successfully to retrieved",
-		"data":    Photos,
+		"id":    Photos.ID,
+		"title" : Photos.Title,
+		"caption" : Photos.Caption,
+		"photo_url" : Photos.PhotoUrl,
+		"user_id" : Photos.UserID,
+		"created_at" : Photos.CreatedAt,
+		"updated_at" : Photos.UpdatedAt,
+		"User"  : gin.H {
+			"email" : Photos.Users.Email,
+			"username" : Photos.Users.Username,
+		},
 	})
 }
+
 
 func GetPhotoByID(c *gin.Context) {
 	db := config.GetDB()
@@ -133,7 +143,12 @@ func UpdatePhoto(c *gin.Context) {
 	}
 
 	helpers.ResponseOK(c, gin.H{
-		"updated": Photo,
+		"id" : Photo.ID,
+		"title" : Photo.Title,
+		"caption" : Photo.Caption,
+		"photo_url" : Photo.PhotoUrl,
+		"user_id" : Photo.UserID,
+		"updated_at" : Photo.UpdatedAt,
 	})
 }
 

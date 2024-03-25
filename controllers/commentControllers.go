@@ -5,6 +5,7 @@ import (
 	"fga-final-project-mygram/helpers"
 	"fga-final-project-mygram/models"
 	"strconv"
+	"time"
 
 	"github.com/dgrijalva/jwt-go"
 	"github.com/gin-gonic/gin"
@@ -40,9 +41,24 @@ func CreateComment(c *gin.Context) {
 		return
 	}
 
+	type CreateCommentResponse struct {
+		ID        uint      `json:"id"`
+		Message   string    `json:"message"`
+		PhotoID   int       `json:"photo_id"`
+		UserID    int       `json:"user_id"`
+		CreatedAt time.Time `json:"created_at"`
+	}
+
+	commentResponse := CreateCommentResponse{
+		ID:        Comment.ID,
+		Message:   Comment.Message,
+		PhotoID:   int(Comment.PhotoID),
+		UserID:    int(Comment.UserID),
+		CreatedAt: *Comment.CreatedAt,
+	}
+
 	helpers.ResponseCreated(c, gin.H{
-		"message": "Comment created successfully",
-		"created": Comment,
+		"data": commentResponse,
 	})
 }
 
@@ -56,11 +72,9 @@ func GetAllComment(c *gin.Context) {
 
 	var Comments []models.Comment
 
-
 	err = db.Debug().Preload("User", func(db *gorm.DB) *gorm.DB {
-        return db.Select("id, username, email")
-    }).Where("photo_id = ?", photoId).Find(&Comments).Error
-
+		return db.Select("id, username, email")
+	}).Where("photo_id = ?", photoId).Find(&Comments).Error
 
 	if err != nil {
 		helpers.ResponseError(c, err.Error())
@@ -151,6 +165,6 @@ func DeletedComment(c *gin.Context) {
 	}
 
 	helpers.ResponseOK(c, gin.H{
-		"message": "Photo has been successfully to deleted",
+		"message": "Comment has been successfully to deleted",
 	})
 }

@@ -92,7 +92,7 @@ func UserDelete(c *gin.Context) {
         return
     }
     helpers.ResponseOK(c, gin.H{
-        "message": "User deleted successfully",
+        "message": "Your account has been successfully deleted.",
     })
 }
 
@@ -107,7 +107,6 @@ func UserUpdate(c *gin.Context) {
 
     // Retrieve the user from the database
     var user models.User
-
     if err := db.First(&user, userID).Error; err != nil {
         helpers.ResponseNotFound(c, "User not found")
         return
@@ -135,15 +134,8 @@ func UserUpdate(c *gin.Context) {
         return
     }
 
-	helpers.ResponseOK(c, gin.H{
-		"message": "User updated successfully",
-		"user": gin.H{
-			"id":        user.ID,
-			"email":     user.Email,
-			"username":  user.Username,
-			"age":       user.Age,
-			"updatedAt": user.UpdatedAt,
-		},
-	})
-	
+    helpers.ResponseOK(c, gin.H{
+        "message": "User updated successfully",
+        "user":    user,
+    })
 }

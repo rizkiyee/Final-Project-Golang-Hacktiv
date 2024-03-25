@@ -14,7 +14,7 @@ func StartApp() *gin.Engine {
 	{
 		userRouter.POST("register", controllers.UserRegister)
 		userRouter.POST("login", controllers.UserLogin)
-		userRouter.DELETE("/:id",  controllers.UserDelete)
+		userRouter.DELETE("/:id", controllers.UserDelete)
 		userRouter.PUT("/:id",  controllers.UserUpdate)
 	}
 

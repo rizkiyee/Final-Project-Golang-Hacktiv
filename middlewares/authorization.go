@@ -22,15 +22,15 @@ func UserAuthorization() gin.HandlerFunc {
 
 		userData := c.MustGet("userData").(jwt.MapClaims)
 		userID := uint(userData["id"].(float64))
-		User := models.User{}
 
-		err = db.Select("user_id").First(&User, uint(userId)).Error
-		if err != nil {
-			helpers.ResponseNotFound(c, err.Error())
+		var user models.User
+
+		if err := db.First(&user, userId).Error; err != nil {
+			helpers.ResponseNotFound(c, "User not found")
 			return
 		}
 
-		if User.ID != userID {
+		if user.ID != userID {
 			helpers.ResponseStatusUnauthorizedWithMessage(c, "Not allowed to access this data")
 			return
 		}

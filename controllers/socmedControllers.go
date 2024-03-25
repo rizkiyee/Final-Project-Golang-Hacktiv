@@ -56,9 +56,9 @@ func GetAllSocmed(c *gin.Context) {
 	var Socialmedias []models.SocialMedia
 
 	err := db.Debug().Preload("User", func(db *gorm.DB) *gorm.DB {
-        return db.Select("id, username, email")
-    }).Find(&Socialmedias).Error
-	
+		return db.Select("id, username, email")
+	}).Find(&Socialmedias).Error
+
 	if err != nil {
 		helpers.ResponseBadRequest(c, err.Error())
 		return
@@ -149,6 +149,6 @@ func DeleteSocmed(c *gin.Context) {
 	}
 
 	c.JSON(http.StatusOK, gin.H{
-		"message": "your photo has been succesfully deleted",
+		"message": "your social media has been succesfully deleted",
 	})
 }
