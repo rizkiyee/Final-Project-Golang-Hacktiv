@@ -73,69 +73,73 @@ func UserLogin(c *gin.Context) {
 }
 
 func UserDelete(c *gin.Context) {
-    db := config.GetDB()
-    userIDParam := c.Param("id")
-    userID, err := strconv.Atoi(userIDParam)
-    if err != nil {
-        helpers.ResponseBadRequestWithMessage(c, "Invalid user ID", helpers.ID)
-        return
-    }
+	db := config.GetDB()
+	userIDParam := c.Param("id")
+	userID, err := strconv.Atoi(userIDParam)
+	if err != nil {
+		helpers.ResponseBadRequestWithMessage(c, "Invalid user ID", helpers.ID)
+		return
+	}
 
-    var user models.User
-    if err := db.First(&user, userID).Error; err != nil {
-        helpers.ResponseNotFound(c, "User not found")
-        return
-    }
+	var user models.User
+	if err := db.First(&user, userID).Error; err != nil {
+		helpers.ResponseNotFound(c, "User not found")
+		return
+	}
 
-    if err := db.Delete(&user).Error; err != nil {
-        helpers.ResponseError(c, err.Error())
-        return
-    }
-    helpers.ResponseOK(c, gin.H{
-        "message": "Your account has been successfully deleted.",
-    })
+	if err := db.Delete(&user).Error; err != nil {
+		helpers.ResponseError(c, err.Error())
+		return
+	}
+	helpers.ResponseOK(c, gin.H{
+		"message": "Your account has been successfully deleted.",
+	})
 }
 
 func UserUpdate(c *gin.Context) {
-    db := config.GetDB()
-    userIDParam := c.Param("id")
-    userID, err := strconv.Atoi(userIDParam)
-    if err != nil {
-        helpers.ResponseBadRequestWithMessage(c, "Invalid user ID", helpers.ID)
-        return
-    }
+	db := config.GetDB()
+	userIDParam := c.Param("id")
+	userID, err := strconv.Atoi(userIDParam)
+	if err != nil {
+		helpers.ResponseBadRequestWithMessage(c, "Invalid user ID", helpers.ID)
+		return
+	}
 
-    // Retrieve the user from the database
-    var user models.User
-    if err := db.First(&user, userID).Error; err != nil {
-        helpers.ResponseNotFound(c, "User not found")
-        return
-    }
+	var user models.User
+	// User := models.User{}
 
-    // Create a struct to hold the fields to update
-    type UserUpdateInput struct {
-        Username string `json:"username"`
-        Email    string `json:"email"`
-    }
+	if err := db.First(&user, userID).Error; err != nil {
+		helpers.ResponseNotFound(c, "User not found")
+		return
+	}
 
-    var userInput UserUpdateInput
-    if err := c.ShouldBindJSON(&userInput); err != nil {
-        helpers.ResponseBadRequestWithMessage(c, "Invalid input data", err.Error())
-        return
-    }
+	// Create a struct to hold the fields to update
+	type UserUpdateInput struct {
+		Username string `json:"username"`
+		Email    string `json:"email"`
+	}
 
-    // Update user fields
-    user.Username = userInput.Username
-    user.Email = userInput.Email
+	var userInput UserUpdateInput
+	if err := c.ShouldBindJSON(&userInput); err != nil {
+		helpers.ResponseBadRequestWithMessage(c, "Invalid input data", err.Error())
+		return
+	}
 
-    // Validate updated user
-    if err := db.Save(&user).Error; err != nil {
-        helpers.ResponseError(c, err.Error())
-        return
-    }
+	// Update user fields
+	user.Username = userInput.Username
+	user.Email = userInput.Email
 
-    helpers.ResponseOK(c, gin.H{
-        "message": "User updated successfully",
-        "user":    user,
-    })
+	// Validate updated user
+	if err := db.Save(&user).Error; err != nil {
+		helpers.ResponseError(c, err.Error())
+		return
+	}
+
+	helpers.ResponseOK(c, gin.H{
+		"id":         user.ID,
+		"email":      user.Email,
+		"username":   user.Username,
+		"age":        user.Age,
+		"updated_at": user.UpdatedAt,
+	})
 }
